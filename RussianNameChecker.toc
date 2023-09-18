@@ -1,0 +1,16 @@
+## Interface: 100107
+## Title:|cffff7d0a<Tools>|r |cff69ccf0Russian Name Checker|r
+## Title-ruRU:|cffff7d0aTools|r |cff69ccf0Слава Україні!|r
+## Title-zhCN:|cffff7d0aTools|r |cff69ccf0Russian Name Checker|r
+## Title-zhTW:|cffff7d0aTools|r |cff69ccf0Russian Name Checker|r
+## Notes: Ru killer
+## Version: 1.0
+## Author: melles1991
+## DefaultState: Enabled
+## X-AddonProvider: github
+## X-Category: Chat & Communication Miscellaneous
+## X-Website: https://legacy.curseforge.com/wow/addons/russian-name-checker
+## X-Curse-Project-ID: 914522
+## LoadOnDemand: 0
+
+manifest.xml
