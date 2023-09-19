@@ -39,5 +39,12 @@ end
 
 -- Функція, яка перевіряє, чи містить рядок російські букви
 function ContainsRussianCharacters(text)
-    return string.match(text, "[а-яА-ЯёЁ]")
+    local count = 0
+    for char in text:gmatch("[а-яА-ЯёЁ]") do
+        count = count + 1
+        if count >= 2 then
+            return true
+        end
+    end
+    return false
 end
