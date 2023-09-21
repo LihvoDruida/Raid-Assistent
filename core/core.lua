@@ -37,26 +37,13 @@ function addon:CheckGroupMembers()
     end
 end
 
--- Функція, яка перевіряє, чи містить рядок кириличні символи і виводить їх у чат
+-- Функція, яка перевіряє, чи містить рядок хоча б один символ кирилиці
 function ContainsRussianCharacters(text)
-    local cyrillicCount = 0
-    local detectedCharacters = {} -- Таблиця для зберігання символів, які спричинили виконання умови
-
     for char in text:gmatch(".") do
         -- Перевірка, чи символ є кириличним і не входить до списку ігнорованих символів
         if IsCyrillic(char) then
-            cyrillicCount = cyrillicCount + 1
-            table.insert(detectedCharacters, char) -- Додаємо символ у таблицю
-            if cyrillicCount >= 2 then
-                break                              -- Виходимо з циклу, якщо вже знайдено два символи
-            end
+            return true -- Повертаємо true, якщо знайдено хоча б один символ
         end
-    end
-
-    if cyrillicCount >= 2 then
-        local detectedString = table.concat(detectedCharacters, ", ") -- Формуємо рядок зі списком символів
-        print("Detected Cyrillic characters:", detectedString)        -- Виводимо список символів у чат
-        return true
     end
 
     return false
@@ -65,27 +52,6 @@ end
 -- Функція для перевірки, чи символ є кириличним
 function IsCyrillic(char)
     local utf8Char = char:byte()
-    -- Створюємо таблицю символів для ігнорування
-    local ignoredCharacters = {
-        192, 193, 194, 195, 196, 197, 198, 199,
-        200, 201, 202, 203, 204, 205, 206, 207, 208, 209,
-        210, 211, 212, 213, 214, 215, 216, 217, 218, 219,
-        220, 221, 222, 223, 224, 225, 226, 227, 228, 229,
-        230, 231, 232, 233, 234, 235, 236, 237, 238, 239,
-        240, 241, 242, 243, 244, 245, 246, 247, 248, 249,
-        250, 251, 252, 253, 254, 255
-    }
-
     return (utf8Char >= 224 and utf8Char <= 243) or
-        (utf8Char >= 128 and utf8Char <= 175) and not tableContains(ignoredCharacters, utf8Char)
-end
-
--- Функція для перевірки, чи символ входить до списку ігнорованих символів
-function tableContains(table, element)
-    for _, value in ipairs(table) do
-        if value == element then
-            return true
-        end
-    end
-    return false
+        (utf8Char >= 128 and utf8Char <= 175) and not (utf8Char >= 192 and utf8Char <= 255)
 end
