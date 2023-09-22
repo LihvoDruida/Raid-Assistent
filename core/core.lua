@@ -8,6 +8,7 @@ local russianPlayerNames = {}
 -- Функція OnEnable викликається при завантаженні аддона
 function addon:OnEnable()
     self:RegisterEvent("GROUP_ROSTER_UPDATE", "CheckGroupMembers")
+    self:RegisterEvent("LFG_LIST_APPLICATION_STATUS_UPDATED", "CheckAndDeclineRussianInvites")
 end
 
 -- Функція, яка перевіряє імена гравців у групі
@@ -34,6 +35,24 @@ function addon:CheckGroupMembers()
         end
         WarnRussianPlayersDetected(playerList)
         GroupUtils_LeaveGroup(playerList)
+    end
+end
+
+-- Функція для перевірки та відхилення запрошень від гравців із кирилицею в імені
+function addon:CheckAndDeclineRussianInvites()
+    if not IsInGroup() and not IsInRaid() then
+        return
+    end
+
+    local numInvites = GetNumInvites()
+
+    for i = 1, numInvites do
+        local inviteSender = GetInviteSender(i)
+
+        if inviteSender and ContainsRussianCharacters(inviteSender) then
+            -- Гравець, який надсилає запрошення, має ім'я із кирилицею
+            DeclineInvite(i) -- Відхиляємо запрошення за індексом
+        end
     end
 end
 
