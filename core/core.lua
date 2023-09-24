@@ -5,10 +5,47 @@ _G.RussianNameChecker = addon
 -- Тут ми створюємо таблицю для збереження унікальних імен російських гравців
 local russianPlayerNames = {}
 
+-- Отримуємо розміри кнопки CompactRaidFrameManagerDisplayFrameLeaderOptionsInitiateReadyCheck
+local readyCheckButton = CompactRaidFrameManagerDisplayFrameLeaderOptionsInitiateReadyCheck
+local _, height = readyCheckButton:GetSize()
+-- Отримуємо шрифт кнопки readyCheckButton
+local readyCheckFontObject = readyCheckButton:GetFontString():GetFontObject()
+
+-- Отримуємо висоту пропусків між кнопками (визначте бажану висоту пропуску)
+local spacingHeight = 0.8
+
+-- Обчислюємо загальну висоту фрейму
+local totalHeight = (height + spacingHeight) * 3 + 5.8
+
+-- Встановлюємо висоту фрейму CompactRaidFrameManagerDisplayFrameLeaderOptions
+CompactRaidFrameManagerDisplayFrameLeaderOptions:SetSize(300, totalHeight)
+
+-- Створюємо вашу кнопку та встановлюємо її розмір відповідно до розміру тексту
+local newButton = CreateFrame("Button", "RussianNameCheckerNewButton", CompactRaidFrameManagerDisplayFrameLeaderOptions,
+    "UIPanelButtonTemplate")
+newButton:SetText("Optimize Raid")
+-- Встановлюємо шрифт для тексту кнопки такий, як у readyCheckButton
+newButton:GetFontString():SetFontObject(readyCheckFontObject)
+-- Отримуємо розміри тексту кнопки та додаємо певний заздалегідь визначений зазор (наприклад, 10 пікселів) для визначення ширини кнопки
+local textWidth = newButton:GetFontString():GetStringWidth() + 20
+-- Встановлюємо ширину кнопки відповідно до розміру тексту
+newButton:SetWidth(textWidth)
+newButton:SetHeight(height) -- Задаємо бажану висоту кнопки
+
+-- Позиція кнопки вгорі фрейму CompactRaidFrameManagerDisplayFrameLeaderOptions
+newButton:SetPoint("TOPLEFT", readyCheckButton, "BOTTOMLEFT", 0, -spacingHeight)
+newButton:SetPoint("TOPRIGHT",
+    readyCheckButton, "BOTTOMRIGHT", 0, -spacingHeight)
+
+-- Функція, яка буде виконуватися при натисканні на кнопку
+newButton:SetScript("OnClick", function(self)
+    -- Додайте ваш код дій, які мають бути виконані при натисканні кнопки тут
+    print("New Button Clicked")
+end)
+
 -- Функція OnEnable викликається при завантаженні аддона
 function addon:OnEnable()
     self:RegisterEvent("GROUP_ROSTER_UPDATE", "CheckGroupMembers")
-    self:RegisterEvent("LFG_LIST_APPLICATION_STATUS_UPDATED", "CheckAndDeclineRussianInvites")
 end
 
 -- Функція, яка перевіряє імена гравців у групі
@@ -34,29 +71,27 @@ function addon:CheckGroupMembers()
             LoadAddOn("RussianNameChecker_Dialogs")
         end
         WarnRussianPlayersDetected(playerList)
-        GroupUtils_LeaveGroup(playerList)
+        GroupUtils_LeaveGroup()
     end
 end
 
--- Функція для перевірки та відхилення запрошень від гравців із кирилицею в імені
-function addon:CheckAndDeclineRussianInvites()
-    if not IsInGroup() and not IsInRaid() then
-        return
+-- Функція для перевірки, чи символ є кирилицьким в UTF-8
+function IsCyrillic(char)
+    -- Отримуємо Unicode-код поточного символу з UTF-8 рядка
+    local utf8Byte1 = char:byte(1)
+
+    -- Перевіряємо діапазони для символів кирилиці в UTF-8
+    if utf8Byte1 >= 0xD0 and utf8Byte1 <= 0xDF then
+        return true -- Дійсний символ кирилиці (2-байтовий UTF-8 символ)
+    elseif utf8Byte1 == 0xD1 then
+        local utf8Byte2 = char:byte(2)
+        return (utf8Byte2 >= 0x80 and utf8Byte2 <= 0x8F) -- Ще один дійсний символ кирилиці (2-байтовий UTF-8 символ)
     end
 
-    local numInvites = GetNumInvites()
-
-    for i = 1, numInvites do
-        local inviteSender = GetInviteSender(i)
-
-        if inviteSender and ContainsRussianCharacters(inviteSender) then
-            -- Гравець, який надсилає запрошення, має ім'я із кирилицею
-            DeclineInvite(i) -- Відхиляємо запрошення за індексом
-        end
-    end
+    return false
 end
 
--- Функція, яка перевіряє, чи містить рядок хоча б один символ кирилиці
+-- Функція, яка перевіряє, чи текст містить хоча б один символ кирилиці
 function ContainsRussianCharacters(text)
     for char in text:gmatch(".") do
         -- Перевірка, чи символ є кириличним і не входить до списку ігнорованих символів
@@ -66,11 +101,4 @@ function ContainsRussianCharacters(text)
     end
 
     return false
-end
-
--- Функція для перевірки, чи символ є кириличним
-function IsCyrillic(char)
-    local utf8Char = char:byte()
-    return (utf8Char >= 224 and utf8Char <= 243) or
-        (utf8Char >= 128 and utf8Char <= 175) and not (utf8Char >= 192 and utf8Char <= 255)
 end
