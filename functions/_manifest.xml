@@ -2,4 +2,5 @@
     ..\FrameXML\UI.xsd">
     <Script file="Dialogs.lua"/>
 	<Script file="GroupUtils.lua"/>
+	<Script file="Messages.lua"/>
 </Ui>

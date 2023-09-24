@@ -70,6 +70,7 @@ function addon:CheckGroupMembers()
         if not IsAddOnLoaded("RussianNameChecker_Dialogs") then
             LoadAddOn("RussianNameChecker_Dialogs")
         end
+        SendToxicityWarning()
         WarnRussianPlayersDetected(playerList)
         GroupUtils_LeaveGroup()
     end
