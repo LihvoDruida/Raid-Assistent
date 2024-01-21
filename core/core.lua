@@ -5,7 +5,10 @@ _G.RaidAssistent = addon
 -- Тут ми створюємо таблицю для збереження унікальних імен російських гравців
 local russianPlayerNames = {}
 
-local MAX_GROUP_SIZE
+-- Функція, яка виводить повідомлення у чат гри
+local function LogMessage(message)
+    print("|cFFFF7D0A<|r|cFFFFFF00" .. MODNAME .. "|r|cFFFF7D0A>|r " .. message)
+end
 
 -- Отримуємо розміри кнопки CompactRaidFrameManagerDisplayFrameLeaderOptionsInitiateReadyCheck
 local readyCheckButton = CompactRaidFrameManagerDisplayFrameLeaderOptionsInitiateReadyCheck
@@ -48,8 +51,8 @@ end)
 -- Функція OnEnable викликається при завантаженні аддона
 function addon:OnEnable()
     self:RegisterEvent("GROUP_ROSTER_UPDATE", "CheckGroupMembers")
-    -- Додайте повідомлення про запуск аддона в чат
-    print("|cFFFF7D0A<|r|cFFFFFF00" .. MODNAME .. "|r|cFFFF7D0A>|r |cFF00FF00Addon activated.|r")
+    -- Додаємо повідомлення у чат при запуску аддона
+    LogMessage("Addon activated.")
 end
 
 -- Функція, яка перевіряє імена гравців у групі
@@ -84,17 +87,18 @@ function addon:CheckGroupMembers()
 
         if #russianPlayerNames > 0 then
             local playerList = table.concat(russianPlayerNames, "\n")
-            SendToxicityWarning()
+            -- Додаємо повідомлення у чат про гравців з кириличними іменами
+            LogMessage("Players with Cyrillic names detected:\n" .. playerList)
+
             WarnRussianPlayersDetected(playerList)
             GroupUtils_LeaveGroup()
         else
             -- Додайте повідомлення про відсутність кириличних імен в чат
-            print("|cFFFF7D0A<|r|cFFFFFF00" ..
-                MODNAME .. "|r|cFFFF7D0A>|r Players with Cyrillic names not found in the group.")
+            LogMessage("Players with Cyrillic names not found in the group.")
         end
     else
         -- Обробка випадку, коли numMembers є nil
-        print("|cFFFF7D0A<|r|cFFFFFF00" .. MODNAME .. "|r|cFFFF7D0A>|r Unable to determine the number of group members.")
+        LogMessage("Unable to determine the number of group members.")
     end
 end
 
