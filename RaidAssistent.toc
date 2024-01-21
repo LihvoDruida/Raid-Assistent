@@ -1,16 +1,14 @@
-## Interface: 100107
+## Interface: 100205
 ## Title:|cffff7d0a<Tools>|r |cff69ccf0Raid Assistent|r
 ## Title-ruRU:|cffff7d0aTools|r |cff69ccf0Слава Україні!|r
-##Title-zhCN: |cffff7d0a工具|r |cff69ccf0团队助手|r
-##Title-zhTW: |cffff7d0a工具|r |cff69ccf0團隊助手|r
+## Title-zhCN: |cffff7d0a工具|r |cff69ccf0团队助手|r
+## Title-zhTW: |cffff7d0a工具|r |cff69ccf0團隊助手|r
 ## Notes: This addon provides tools and functionality for raid/group management and coordination in World of Warcraft.
 ## Version: 1.12
 ## Author: melles1991
 ## DefaultState: Enabled
 ## X-AddonProvider: github
 ## X-Category: Chat & Communication Miscellaneous
-## X-Website: https://legacy.curseforge.com/wow/addons/russian-name-checker
-## X-Curse-Project-ID: 914522
 ## LoadOnDemand: 0
 
 manifest.xml
