@@ -1,9 +1,11 @@
-local MODNAME = "RussianNameChecker"
+local MODNAME = "RaidAssistent"
 local addon = LibStub("AceAddon-3.0"):NewAddon(MODNAME, "AceEvent-3.0")
-_G.RussianNameChecker = addon
+_G.RaidAssistent = addon
 
 -- Тут ми створюємо таблицю для збереження унікальних імен російських гравців
 local russianPlayerNames = {}
+
+local MAX_GROUP_SIZE
 
 -- Отримуємо розміри кнопки CompactRaidFrameManagerDisplayFrameLeaderOptionsInitiateReadyCheck
 local readyCheckButton = CompactRaidFrameManagerDisplayFrameLeaderOptionsInitiateReadyCheck
@@ -21,7 +23,7 @@ local totalHeight = (height + spacingHeight) * 3 + 5.8
 CompactRaidFrameManagerDisplayFrameLeaderOptions:SetSize(300, totalHeight)
 
 -- Створюємо вашу кнопку та встановлюємо її розмір відповідно до розміру тексту
-local newButton = CreateFrame("Button", "RussianNameCheckerNewButton", CompactRaidFrameManagerDisplayFrameLeaderOptions,
+local newButton = CreateFrame("Button", "RaidAssistentNewButton", CompactRaidFrameManagerDisplayFrameLeaderOptions,
     "UIPanelButtonTemplate")
 newButton:SetText("Optimize Raid")
 -- Встановлюємо шрифт для тексту кнопки такий, як у readyCheckButton
@@ -46,6 +48,8 @@ end)
 -- Функція OnEnable викликається при завантаженні аддона
 function addon:OnEnable()
     self:RegisterEvent("GROUP_ROSTER_UPDATE", "CheckGroupMembers")
+    -- Додайте повідомлення про запуск аддона в чат
+    print("|cFFFF7D0A<|r|cFFFFFF00" .. MODNAME .. "|r|cFFFF7D0A>|r |cFF00FF00Addon activated.|r")
 end
 
 -- Функція, яка перевіряє імена гравців у групі
@@ -56,23 +60,41 @@ function addon:CheckGroupMembers()
 
     wipe(russianPlayerNames)
     local numMembers = GetNumGroupMembers()
-    for i = 1, numMembers do
-        local name, _, _, _, _, _, _, _, _, _, _ = GetRaidRosterInfo(i)
-        if name and ContainsRussianCharacters(name) then
-            if not tContains(russianPlayerNames, name) then
-                table.insert(russianPlayerNames, name)
-            end
-        end
+
+    if IsInRaid() then
+        MAX_GROUP_SIZE = MAX_RAID_MEMBERS
+    elseif IsInGroup() then
+        MAX_GROUP_SIZE = MAX_PARTY_MEMBERS
+    else
+        MAX_GROUP_SIZE = 1 -- Якщо гравець не в групі, то максимальний розмір групи 1 (гравець в одиночній грі)
     end
 
-    if #russianPlayerNames > 0 then
-        local playerList = table.concat(russianPlayerNames, "\n")
-        if not IsAddOnLoaded("RussianNameChecker_Dialogs") then
-            LoadAddOn("RussianNameChecker_Dialogs")
+    -- Перевірка, чи numMembers не є nil
+    if numMembers then
+        for i = 1, numMembers do
+            local name, _, _, _, _, _, _, _, _, _, _ = GetRaidRosterInfo(i)
+            if name then -- Додаткова перевірка, чи name не є nil
+                if ContainsRussianCharacters(name) then
+                    if not tContains(russianPlayerNames, name) then
+                        table.insert(russianPlayerNames, name)
+                    end
+                end
+            end
         end
-        SendToxicityWarning()
-        WarnRussianPlayersDetected(playerList)
-        GroupUtils_LeaveGroup()
+
+        if #russianPlayerNames > 0 then
+            local playerList = table.concat(russianPlayerNames, "\n")
+            SendToxicityWarning()
+            WarnRussianPlayersDetected(playerList)
+            GroupUtils_LeaveGroup()
+        else
+            -- Додайте повідомлення про відсутність кириличних імен в чат
+            print("|cFFFF7D0A<|r|cFFFFFF00" ..
+                MODNAME .. "|r|cFFFF7D0A>|r Players with Cyrillic names not found in the group.")
+        end
+    else
+        -- Обробка випадку, коли numMembers є nil
+        print("|cFFFF7D0A<|r|cFFFFFF00" .. MODNAME .. "|r|cFFFF7D0A>|r Unable to determine the number of group members.")
     end
 end
 
